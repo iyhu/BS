@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Friend Book</title>
+</head>
+<body>
+<h1>Friend Book</h1>
+
+<form id="addFriendForm" action="/friends/" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" id="aname" name="name" required><br><br>
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="aphoneNumber" name="phoneNumber" required><br><br>
+    <label for="address">Address:</label>
+    <input type="text" id="aaddress" name="address" required><br><br>
+    <input type="submit" value="Add Friend">
+</form>
+
+<h2>Search Friends</h2>
+
+<form id="searchByNameForm" action="/friends/searchByName/" method="GET">
+    <label for="name">By Name:</label>
+    <input type="text" id="name" name="name" required>
+    <input type="submit" value="Search">
+</form>
+
+<form id="searchByPhoneNumberForm" action="/friends/searchByPhoneNumber/" method="GET">
+    <label for="phoneNumber">By Phone Number:</label>
+    <input type="tel" id="phoneNumber" name="phoneNumber" required>
+    <input type="submit" value="Search">
+</form>
+
+<form id="searchByAddressForm" action="/friends/searchByAddress/" method="GET">
+    <label for="address">By Address:</label>
+    <input type="text" id="address" name="address" required>
+    <input type="submit" value="Search">
+</form>
+
+<h2>Friend List</h2>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Phone Number</th>
+        <th>Address</th>
+        <th>Action</th>
+    </tr>
+    <tbody id="friendList"></tbody>
+</table>
+
+<script>
+    // 获取联系人列表并展示在页面上
+    fetch('/friends/')
+        .then(response => response.json())
+        .then(data => {
+            const friendList = document.getElementById('friendList');
+            data.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                        <td>${contact.name}</td>
+                        <td>${contact.phoneNumber}</td>
+                        <td>${contact.address}</td>
+                        <td><button onclick="deleteFriend('${contact.name}')">Delete</button></td>
+                    `;
+                friendList.appendChild(row);
+            });
+        });
+
+    // 删除联系人
+    function deleteFriend(name) {
+        fetch(`/friends/${name}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(() => {
+                const friendList = document.getElementById('contactList');
+                friendList.innerHTML = ''; // 清空联系人列表
+                fetch('/friends/') // 获取更新后的联系人列表
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(friend => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                    <td>${friend.name}</td>
+                                    <td>${friend.phoneNumber}</td>
+                                    <td>${friend.address}</td>
+                                    <td><button onclick="deleteFriend('${friend.name}')">Delete</button></td>
+                                `;
+                            friendList.appendChild(row);
+                        });
+                    });
+            });
+    }
+</script>
+</body>
+</html>
